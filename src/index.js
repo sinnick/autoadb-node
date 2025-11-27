@@ -142,6 +142,7 @@ async function connectDevice(device) {
     await runAdb(["connect", device.endpoint]);
     console.log(`Connected to ${device.name}!`);
     sendNotification("ADB connected", `${device.name} @ ${device.endpoint}`);
+    launchScrcpy(device.endpoint);
   } catch (error) {
     console.error(`Failed to connect: ${error.message}`);
     sendNotification("ADB connect failed", `${device.name}: ${error.message}`);
@@ -308,4 +309,16 @@ function sendNotification(title, body) {
   } catch (error) {
     console.error("Unable to send desktop notification:", error.message);
   }
+}
+
+function launchScrcpy(endpoint) {
+  console.log(`Launching scrcpy for ${endpoint}...`);
+  const child = spawn("scrcpy", [`--tcpip=${endpoint}`, "-m", "1024"], {
+    stdio: "inherit",
+    windowsHide: true,
+  });
+
+  child.on("error", (error) => {
+    console.error(`Failed to start scrcpy: ${error.message}`);
+  });
 }
